@@ -1,4 +1,4 @@
---Membuat Tabel Analisa
+-- Membuat Tabel Analisa
 CREATE OR REPLACE TABLE Kimia_Farma.kf_analisa as
 SELECT
     t.transaction_id,
@@ -23,11 +23,11 @@ SELECT
         ELSE 0.30
     END AS persentase_gross_laba,
 
-    --Hitung harga stelah diskon (nett sales)
-    t.price * (1 - t.discount_percentage) AS nett_sales,
-    t.price * (1 - t.discount_percentage) *
+    -- Hitung harga setelah diskon atau nett sales
+    t.price * (1 - t.discount_percentage / 100) AS nett_sales,
 
-    --Hitung nett profit
+    -- Hitung nett profit
+    t.price * (1 - t.discount_percentage / 100) *
     CASE
         WHEN t.price <= 50000 THEN 0.10
         WHEN t.price > 50000 AND t.price <= 100000 THEN 0.15
@@ -35,10 +35,11 @@ SELECT
         WHEN t.price > 300000 AND t.price <= 500000 THEN 0.25
         ELSE 0.30
     END AS nett_profit,
-    t.rating
+    
+    t.rating as rating_transaksi
 FROM
     `Kimia_Farma.kf_final_transaction` t
-JOIN
+LEFT JOIN
     `Kimia_Farma.kf_kantor_cabang` c ON t.branch_id = c.branch_id
-JOIN
+LEFT JOIN
     `Kimia_Farma.kf_product` p ON t.product_id = p.product_id;
